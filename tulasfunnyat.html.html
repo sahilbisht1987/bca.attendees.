@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tula's Attendance (SB)</title>
+<style>
+  body{
+    font-family:"Poppins",sans-serif;
+    margin:0;padding:20px;color:#fff;
+    background:linear-gradient(135deg,#0066ff,#00e0ff);
+    transition:background 0.6s ease;
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  header{text-align:center;margin-bottom:16px;}
+  header h1{
+    margin:0;font-size:1.8rem;
+    color:#fff;text-shadow:0 0 20px rgba(255,255,255,0.8);
+    letter-spacing:1px;
+  }
+  .card{
+    width:100%;max-width:520px;
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(10px);
+    padding:22px;border-radius:15px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  label{
+    display:block;text-align:left;margin:8px 0 6px;
+    font-weight:700;font-size:1.05rem;color:#ffffff;
+    text-shadow:0 0 8px rgba(0,255,255,0.7);
+    letter-spacing:0.5px;
+  }
+
+  input[type="number"]{
+    width:100%;padding:12px;border-radius:8px;border:none;
+    font-size:1rem;background:rgba(255,255,255,0.25);
+    color:#fff;box-shadow:0 0 12px rgba(0,0,0,0.3);
+  }
+
+  input::placeholder{color:black;font-weight:600;}
+
+  .row{display:flex;gap:12px;margin-top:10px;}
+  .row>div{flex:1;}
+  @media (max-width:600px){.row{flex-direction:column;}}
+
+  button{
+    margin-top:18px;width:100%;padding:12px;border-radius:10px;border:none;
+    cursor:pointer;background:linear-gradient(90deg,#00ffcc,#00b4db);
+    color:#000;font-weight:700;font-size:1.05rem;transition:transform 0.2s;
+  }
+  button:hover{transform:scale(1.05);}
+
+  .result{
+    margin-top:20px;background:rgba(0,0,0,0.25);
+    padding:16px;border-radius:10px;text-align:left;color:#fff;display:none;
+    box-shadow:0 0 20px rgba(255,255,255,0.1);
+  }
+
+  .big{font-size:1.1rem;font-weight:700;}
+  footer{margin-top:20px;opacity:0.9;}
+  .note{font-size:0.9rem;opacity:0.95;margin-top:8px;text-align:center;}
+
+  .highlight-box{
+    margin-top:16px;padding:16px;border-radius:14px;
+    background:rgba(0,255,200,0.15);border:2px solid #00ffc8;text-align:center;
+    box-shadow:0 0 25px rgba(0,255,200,0.6);animation:glow 1.5s infinite alternate;
+  }
+  .highlight-num{
+    display:block;font-size:2rem;font-weight:800;
+    color:#00ffcc;text-shadow:0 0 12px #00ffcc;
+  }
+  @keyframes glow{
+    from{transform:scale(1);box-shadow:0 0 15px rgba(0,255,200,0.4);}
+    to{transform:scale(1.05);box-shadow:0 0 30px rgba(0,255,200,1);}
+  }
+  .meme-gif{
+    width:100%;margin-top:12px;border-radius:12px;
+    box-shadow:0 0 15px rgba(0,0,0,0.3);
+  }
+</style>
+</head>
+<body>
+
+<header><h1>✨ Created by <b>S B</b></h1></header>
+
+<div class="card">
+  <div class="row">
+    <div>
+      <label>🧮 Class Absent Days</label>
+      <input type="number" id="absentClass" placeholder="Type your absent in number" min="0">
+    </div>
+    <div>
+      <label>🔬 Lab Absent Days</label>
+      <input type="number" id="absentLab" placeholder="Type your absent in number" min="0">
+    </div>
+  </div>
+
+  <div class="note">(Classes count from <b>25 Aug 2025</b> → till today; Holidays auto removed; Christmas after 25 Dec)</div>
+
+  <button onclick="compute()">Calculate Attendance</button>
+
+  <div id="out" class="result"></div>
+</div>
+
+<footer>© 2025 | Created by <b>S B</b></footer>
+
+<script>
+function getIndiaDate(){
+  return new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));
+}
+function computeWorkingDays(start,end){
+  let d=new Date(start.getTime()),count=0;
+  while(d<=end){let day=d.getDay();if(day!==0&&day!==6)count++;d.setDate(d.getDate()+1);}
+  return count;
+}
+
+function compute(){
+  const absentClass=parseInt(document.getElementById('absentClass').value)||0;
+  const absentLab=parseInt(document.getElementById('absentLab').value)||0;
+  const start=new Date("2025-08-25");
+  const today=getIndiaDate();
+  const semEnd=new Date("2025-12-15");
+
+  start.setHours(0,0,0,0);today.setHours(0,0,0,0);
+
+  const holidayStrings=[
+    "2025-10-01","2025-10-02","2025-10-20","2025-10-21","2025-10-22",
+    "2025-10-23","2025-10-24","2025-10-25"
+  ];
+  const christmas=new Date("2025-12-25");
+  if(today>=christmas){holidayStrings.push("2025-12-25");}
+
+  const holidays=holidayStrings.map(s=>new Date(s+"T00:00:00"));
+  const workingDays=computeWorkingDays(start,today);
+
+  let holidayCount=0;
+  for(const h of holidays){
+    if(h>=start&&h<=today){let day=h.getDay();if(day!==0&&day!==6)holidayCount++;}
+  }
+
+  const totalClassDays=Math.max(0,workingDays-holidayCount);
+  const fullWeeks=Math.floor(workingDays/5);
+  let labDays=fullWeeks*4;
+  let rem=workingDays%5;
+  labDays+=Math.min(rem,4);
+  let holidayOnMonThu=0;
+  for(const h of holidays){
+    if(h>=start&&h<=today){let wd=h.getDay();if(wd>=1&&wd<=4)holidayOnMonThu++;}
+  }
+  labDays=Math.max(0,labDays-holidayOnMonThu);
+
+  const presentClass=Math.max(0,totalClassDays-absentClass);
+  const presentLab=Math.max(0,labDays-absentLab);
+  const classPercent=totalClassDays===0?0:(presentClass/totalClassDays)*100;
+  const labPercent=labDays===0?0:(presentLab/labDays)*100;
+  const overallPercent=(presentClass+presentLab)/(totalClassDays+labDays)*100||0;
+
+  let remainingDays=Math.floor((semEnd - today)/(1000*60*60*24));
+  let required=0;
+  if(overallPercent<75){
+    const totalHeld=totalClassDays+labDays;
+    const totalPresent=presentClass+presentLab;
+    required=Math.ceil(((0.75*(totalHeld+remainingDays))-totalPresent));
+    if(required<0)required=0;
+  }
+
+  const out=document.getElementById('out');
+  let meme="",gifHTML="",bg1="#0066ff",bg2="#00e0ff";
+
+  if(overallPercent<30){
+    meme="😅 बेटा तुमसे ना हो पाएगा!";
+    gifHTML=`<img src="gif.1.png" alt="Low Attendance" class="meme-gif">`;
+    bg1="#ff0000";bg2="#ff6600";
+  }
+  else if(overallPercent<=50){
+    meme="🚫 मत कर लल्ला, मत कर... कॉलेज चला जा!";
+    gifHTML=`<img src="gif.2.png" alt="Go to College" class="meme-gif">`;
+    bg1="#ff6600";bg2="#ffcc00";
+  }
+  else if(overallPercent>=75){
+    meme="👑 आप CR बन सकते हो — Perfect attendance!";
+    gifHTML=`<img src="gif.3.png" alt="Top Attendance" class="meme-gif">`;
+    bg1="#00ff88";bg2="#00b4db";
+  }
+  else{
+    meme="🙂 Keep improving! अभी 75% के पास हो!";
+     gifHTML=`<img src="gif.4.png" alt="Top Attendance" class="meme-gif">`;
+    bg1="#00b09b";bg2="#96c93d";
+  }
+
+  document.body.style.background=`linear-gradient(135deg,${bg1},${bg2})`;
+
+  let needHTML="";
+  if(overallPercent<75){
+    needHTML=`<div class="highlight-box">
+      🧮 <b>To reach 75%</b>
+      <span class="highlight-num">${required} Days</span>
+      <small>Attend daily to reach safe zone!</small>
+    </div>`;
+  }
+
+  out.style.display="block";
+  out.innerHTML=`
+    <div class="big">📅 Period: ${start.toDateString()} → ${today.toDateString()}</div>
+    <div style="margin-top:8px;">
+      🔸 Working days (Mon–Fri): <b>${workingDays}</b><br>
+      🔸 Holidays removed: <b>${holidayCount}</b><br>
+      🔸 Class Days: <b>${totalClassDays}</b><br>
+      🔸 Lab Days (est.): <b>${labDays}</b>
+    </div>
+    <hr style="margin:12px 0;border-color:rgba(255,255,255,0.15)">
+    <div>
+      📚 Class Attendance: <b>${presentClass}</b>/<b>${totalClassDays}</b> → <b>${classPercent.toFixed(1)}%</b><br>
+      🧪 Lab Attendance: <b>${presentLab}</b>/<b>${labDays}</b> → <b>${labPercent.toFixed(1)}%</b><br>
+      🎯 Overall: <b>${overallPercent.toFixed(1)}%</b>
+    </div>
+    ${needHTML}
+    <div style="margin-top:12px;font-weight:800;font-size:1.05rem;">${meme}</div>
+    ${gifHTML}
+  `;
+}
+</script>
+
+</body>
+</html>
