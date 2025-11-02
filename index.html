@@ -126,10 +126,13 @@ function compute(){
 
   start.setHours(0,0,0,0);today.setHours(0,0,0,0);
 
+  // ✅ 14 holidays added here
   const holidayStrings=[
-    "2025-10-01","2025-10-02","2025-10-20","2025-10-21","2025-10-22",
-    "2025-10-23","2025-10-24","2025-10-25"
+    "2025-08-29","2025-09-05","2025-09-19","2025-10-01","2025-10-02",
+    "2025-10-20","2025-10-21","2025-10-22","2025-10-23","2025-10-24",
+    "2025-10-25","2025-11-01","2025-11-14","2025-11-27"
   ];
+
   const christmas=new Date("2025-12-25");
   if(today>=christmas){holidayStrings.push("2025-12-25");}
 
@@ -187,7 +190,7 @@ function compute(){
   }
   else{
     meme="🙂 Keep improving! अभी 75% के पास हो!";
-     gifHTML=`<img src="gif.4.png" alt="Top Attendance" class="meme-gif">`;
+    gifHTML=`<img src="gif.4.png" alt="Top Attendance" class="meme-gif">`;
     bg1="#00b09b";bg2="#96c93d";
   }
 
